@@ -1,11 +1,11 @@
--- slp13at420 of EmuDevs.com
+-- slp13at420 of EmuDevs.com --
+print("-----------------------------------")
 local npcid = 390001
 local currency = 44209
 local bet = 1
 local Suit = {};
 local Card = {};
 local Hand = {};
-
 local function GetItemNameById(id)
 local err = "ERROR GetItemById() name value is nil(Item "..id.." May not exist in database)"
 local search = WorldDBQuery("SELECT `name` FROM `item_template` WHERE `entry` = '"..id.."';");
@@ -52,10 +52,28 @@ local function BlackJackOnPlayerWin(event, player, unit)
 	player:GossipSendMenu(1, Hand[player:GetGUIDLow()].creature)
 end
 
+local function BlackJackOnPlayerTO(event, player, unit)
+	player:GossipClearMenu()
+	player:GossipMenuAddItem(10,"You:"..Hand[player:GetGUIDLow()].player.." :: Dealer:"..Hand[player:GetGUIDLow()].dealer.."", 0, 9)
+	player:GossipMenuAddItem(10,"21 You win.", 0, 14)
+	player:GossipMenuAddItem(10,"again.", 0, 8)
+	player:GossipMenuAddItem(10,"good bye.", 0, 10)
+	player:GossipSendMenu(1, Hand[player:GetGUIDLow()].creature)
+end
+
 local function BlackJackOnDealerWin(event, player, unit)
 	player:GossipClearMenu()
 	player:GossipMenuAddItem(10,"You:"..Hand[player:GetGUIDLow()].player.." :: Dealer:"..Hand[player:GetGUIDLow()].dealer.."", 0, 9)
 	player:GossipMenuAddItem(10,"You went over 21.", 0, 15)
+	player:GossipMenuAddItem(10,"again.", 0, 8)
+	player:GossipMenuAddItem(10,"good bye.", 0, 10)
+	player:GossipSendMenu(1, Hand[player:GetGUIDLow()].creature)
+end
+
+local function BlackJackOnDealerTO(event, player, unit)
+	player:GossipClearMenu()
+	player:GossipMenuAddItem(10,"You:"..Hand[player:GetGUIDLow()].player.." :: Dealer:"..Hand[player:GetGUIDLow()].dealer.."", 0, 9)
+	player:GossipMenuAddItem(10,"21 Dealer Wins.", 0, 15)
 	player:GossipMenuAddItem(10,"again.", 0, 8)
 	player:GossipMenuAddItem(10,"good bye.", 0, 10)
 	player:GossipSendMenu(1, Hand[player:GetGUIDLow()].creature)
@@ -81,10 +99,15 @@ local card = Card[player:GetGUIDLow()][suit][2][value][1]
 		Card[player:GetGUIDLow()][suit][2][value][1] = nil;
 		Hand[player:GetGUIDLow()].player = (Hand[player:GetGUIDLow()].player + card)
 
+		if(Hand[player:GetGUIDLow()].player < 21)then
+		end
 		if(Hand[player:GetGUIDLow()].player > 21)then
+			player:RemoveEvents()
 			BlackJackOnDealerWin(event, player, Hand[player:GetGUIDLow()].creature)
-		else
-			BlackJackOnPlay(1, player)
+		end
+		if(Hand[player:GetGUIDLow()].player==21)then
+			player:RemoveEvents()
+			BlackJackOnPlayerTO(event, player, Hand[player:GetGUIDLow()].creature)
 		end
 	else
 --		print("player nil card : Redeal")
@@ -104,34 +127,41 @@ local suit_name = Card[player:GetGUIDLow()][suit][1]
 		Hand[player:GetGUIDLow()].dealer = (Hand[player:GetGUIDLow()].dealer + card)
 		Hand[player:GetGUIDLow()].first = card
 	else
---		print("dealer nil card : Redeal")
+		print("dealer nil card : Redeal")
 		DealerDeal_FIRST_Card(event, timer, cycle, player)
 	end
 end
 
 local function DealerDealCard(event, timer, cycle, player)
-	local avg = (Hand[player:GetGUIDLow()].dealer / Hand[player:GetGUIDLow()].turns)
-	local suit = math.random(1,4)
-	local value = math.random(1,14)
-	local suit_name = Card[player:GetGUIDLow()][suit][1]
-	local card = Card[player:GetGUIDLow()][suit][2][value][1]
+local avg = (Hand[player:GetGUIDLow()].dealer / Hand[player:GetGUIDLow()].turns)
+local suit = math.random(1,4)
+local value = math.random(1,14)
+local suit_name = Card[player:GetGUIDLow()][suit][1]
+local card = Card[player:GetGUIDLow()][suit][2][value][1]
 
-		if(card)then
-			Hand[player:GetGUIDLow()].turns =(Hand[player:GetGUIDLow()].turns + 1)
-			Card[player:GetGUIDLow()][suit][2][value][1] = nil;
-			Hand[player:GetGUIDLow()].dealer = (Hand[player:GetGUIDLow()].dealer + card)
-
+	if(card)then
+		Hand[player:GetGUIDLow()].turns =(Hand[player:GetGUIDLow()].turns + 1)
+		Card[player:GetGUIDLow()][suit][2][value][1] = nil;
+		Hand[player:GetGUIDLow()].dealer = (Hand[player:GetGUIDLow()].dealer + card)
+		
+			if(Hand[player:GetGUIDLow()].dealer==21)then
+				player:RemoveEvents()
+				BlackJackOnDealerTO(event, player, unit)
+			end
+			
 			if(Hand[player:GetGUIDLow()].dealer > 21)then
+				player:RemoveEvents()
 				BlackJackOnPlayerWin(event, player, Hand[player:GetGUIDLow()].creature)
 				local win = (bet * Hand[player:GetGUIDLow()].turns)*2
 				player:AddItem(currency, win)
-			else
+			end
+			
+			if(Hand[player:GetGUIDLow()].dealer < 21)then
 				BlackJackOnPlay(1, player)
 			end
-		else
-			print("dealer Redeal")
+	else
 		player:RegisterEvent(DealerDealCard, 100, 1)
-		end
+	end
 end
 
 local function BlackJackOnSelect(event, player, unit, sender, intid, code)
@@ -152,19 +182,19 @@ local function BlackJackOnSelect(event, player, unit, sender, intid, code)
 	end
 	if(intid==11)then -- start game
 		player:RemoveItem(currency, bet)
-		player:RegisterEvent(PlayerDealCard, 100, 2)
-		player:RegisterEvent(Dealer_FIRST_DealCard, 200, 1)
-		player:RegisterEvent(DealerDealCard, 300, 1)
+		ptimer = player:RegisterEvent(PlayerDealCard, 10, 2)
+		dftimer = player:RegisterEvent(Dealer_FIRST_DealCard, 20, 1)
+		dtimer = player:RegisterEvent(DealerDealCard, 30, 1)
 	end
 --	++++++++++++++++++++++++++++++++++++ --
 	if(intid==12)then -- hit me
 		player:RemoveItem(currency, bet)
-		player:RegisterEvent(PlayerDealCard, 100, 1)
-		player:RegisterEvent(DealerDealCard, 150, 1)
+		ptimer = player:RegisterEvent(PlayerDealCard, 10, 1)
+		dtimer = player:RegisterEvent(DealerDealCard, 20, 1)
 	end
 	if(intid==13)then
 	 -- stay
-		player:RegisterEvent(DealerDealCard, 100, 1)
+		dtimer = player:RegisterEvent(DealerDealCard, 10, 1)
 	end
 	if(intid==14)then
 		BlackJackOnPlayerWin(1, player, unit)
@@ -176,6 +206,5 @@ end
 
 RegisterCreatureGossipEvent(npcid, 1, BlackJackOnHello)
 RegisterCreatureGossipEvent(npcid, 2, BlackJackOnSelect)
-print("-----------------------------------")
 print("Grumboz BlackJack and Hookerz running wild.")
 print("-----------------------------------")
