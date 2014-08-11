@@ -176,3 +176,6 @@ end
 
 RegisterCreatureGossipEvent(npcid, 1, BlackJackOnHello)
 RegisterCreatureGossipEvent(npcid, 2, BlackJackOnSelect)
+print("-----------------------------------")
+print("Grumboz BlackJack and Hookerz running wild.")
+print("-----------------------------------")
