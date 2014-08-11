@@ -35,7 +35,6 @@ end
 local function BlackJackOnHello(event, player, unit)
 ShuffleCards(player)
 ShuffleHand(player, unit)
-
 	player:GossipClearMenu()
 	player:GossipMenuAddItem(10,"costs "..bet.." "..currency_name..".", 0, 8)
 	player:GossipMenuAddItem(10,"Play BlackJack.", 0, 11)
@@ -49,7 +48,7 @@ local function BlackJackOnPlayerWin(event, player, unit)
 	player:GossipMenuAddItem(10,"You win. Dealer went over 21.", 0, 14)
 	player:GossipMenuAddItem(10,"again.", 0, 8)
 	player:GossipMenuAddItem(10,"good bye.", 0, 10)
-	player:GossipSendMenu(1, unit)
+	player:GossipSendMenu(1, Hand[player:GetGUIDLow()].creature)
 end
 
 local function BlackJackOnDealerWin(event, player, unit)
@@ -71,66 +70,67 @@ end
 
 local function PlayerDealCard(event, timer, cycle, player)
 
-		Hand[player:GetGUIDLow()].turns =(Hand[player:GetGUIDLow()].turns + 1)
-		local suit = math.random(1,4)
-		local value = math.random(1,13)
-		local card = Card[player:GetGUIDLow()][suit][2][value][1]
-		local suit_name = Card[player:GetGUIDLow()][suit][1]
+local suit = math.random(1,4)
+local value = math.random(1,13)
+local card = Card[player:GetGUIDLow()][suit][2][value][1]
+--	local suit_name = Card[player:GetGUIDLow()][suit][1]
 
-			if(card)then
-				Card[player:GetGUIDLow()][suit][2][value][1] = nil;
-				Hand[player:GetGUIDLow()].player = (Hand[player:GetGUIDLow()].player + card)
-		print("P:"..Card[player:GetGUIDLow()][suit][2][value][2],suit_name,Hand[player:GetGUIDLow()].player)
-			else
-				print("player nil card : Redeal")
-				PlayerDealCard(timer, cycle, id, player)
-			end
-	if(Hand[player:GetGUIDLow()].player > 21)then
-		BlackJackOnDealerWin(event, player, Hand[player:GetGUIDLow()].creature)
+	if(card)then
+		Hand[player:GetGUIDLow()].turns =(Hand[player:GetGUIDLow()].turns + 1)
+		Card[player:GetGUIDLow()][suit][2][value][1] = nil;
+		Hand[player:GetGUIDLow()].player = (Hand[player:GetGUIDLow()].player + card)
+
+		if(Hand[player:GetGUIDLow()].player > 21)then
+			BlackJackOnDealerWin(event, player, Hand[player:GetGUIDLow()].creature)
+		else
+			BlackJackOnPlay(1, player)
+		end
+	else
+		print("player nil card : Redeal")
+		player:RegisterEvent(PlayerDealCard, 100, 1)
 	end
 end
 
 local function Dealer_FIRST_DealCard(event, timer, cycle, player)
-Hand[player:GetGUIDLow()].turns =(Hand[player:GetGUIDLow()].turns + 1)
 local suit = math.random(1,4)
 local value = math.random(1,14)
 local card = Card[player:GetGUIDLow()][suit][2][value][1]
 local suit_name = Card[player:GetGUIDLow()][suit][1]
 
 	if(card)then
+		Hand[player:GetGUIDLow()].turns =(Hand[player:GetGUIDLow()].turns + 1)
 		Card[player:GetGUIDLow()][suit][2][value][1] = nil;
 		Hand[player:GetGUIDLow()].dealer = (Hand[player:GetGUIDLow()].dealer + card)
 		Hand[player:GetGUIDLow()].first = card
-print("D1:"..Card[player:GetGUIDLow()][suit][2][value][2],suit_name,Hand[player:GetGUIDLow()].dealer)
 	else
 		print("dealer nil card : Redeal")
-		DealerDealCard(timer, cycle, id, player)
+		DealerDeal_FIRST_Card(event, timer, cycle, player)
 	end
 end
 
 local function DealerDealCard(event, timer, cycle, player)
-		Hand[player:GetGUIDLow()].turns =(Hand[player:GetGUIDLow()].turns + 1)
-		local avg = (Hand[player:GetGUIDLow()].dealer / Hand[player:GetGUIDLow()].turns)
-		local suit = math.random(1,4)
-		local value = math.random(1,14)
-		local card = Card[player:GetGUIDLow()][suit][2][value][1]
-		local suit_name = Card[player:GetGUIDLow()][suit][1]
-		
-			if(card)then
-				Card[player:GetGUIDLow()][suit][2][value][1] = nil;
-				Hand[player:GetGUIDLow()].dealer = (Hand[player:GetGUIDLow()].dealer + card)
-print("D:"..Card[player:GetGUIDLow()][suit][2][value][2],suit_name,Hand[player:GetGUIDLow()].dealer)
+	local avg = (Hand[player:GetGUIDLow()].dealer / Hand[player:GetGUIDLow()].turns)
+	local suit = math.random(1,4)
+	local value = math.random(1,14)
+	local suit_name = Card[player:GetGUIDLow()][suit][1]
+	local card = Card[player:GetGUIDLow()][suit][2][value][1]
+
+		if(card)then
+			Hand[player:GetGUIDLow()].turns =(Hand[player:GetGUIDLow()].turns + 1)
+			Card[player:GetGUIDLow()][suit][2][value][1] = nil;
+			Hand[player:GetGUIDLow()].dealer = (Hand[player:GetGUIDLow()].dealer + card)
+
+			if(Hand[player:GetGUIDLow()].dealer > 21)then
+				BlackJackOnPlayerWin(event, player, Hand[player:GetGUIDLow()].creature)
+				local win = (bet * Hand[player:GetGUIDLow()].turns)*2
+				player:AddItem(currency, win)
 			else
-				print("dealer Redeal")
-				DealerDealCard(timer, cycle, id, player)
+				BlackJackOnPlay(1, player)
 			end
-	if(Hand[player:GetGUIDLow()].dealer > 21)then
-		BlackJackOnPlayerWin(event, player, Hand[player:GetGUIDLow()].creature)
-		local win = (bet * Hand[player:GetGUIDLow()].turns)*2
-		player:AddItem(currency, win)
-	else
-		BlackJackOnPlay(1, player)
-	end
+		else
+			print("dealer Redeal")
+		player:RegisterEvent(DealerDealCard, 100, 1)
+		end
 end
 
 local function BlackJackOnSelect(event, player, unit, sender, intid, code)
@@ -138,10 +138,13 @@ local function BlackJackOnSelect(event, player, unit, sender, intid, code)
 		BlackJackOnHello(1, player, unit)
 	end
 	if(intid==8)then -- go otion screen
-		ShuffleHand(player, unit)
+		player:RemoveItem(currency, bet)
 		ShuffleCards(player)
-		print()
-		BlackJackOnSelect(2, player, unit, sender ,11)
+		ShuffleHand(player, unit)
+		BlackJackOnPlay(2, player, unit, sender)
+	end
+	if(intid==9)then -- return game screen 
+		BlackJackOnPlay(1, player, unit)
 	end
 	if(intid==10)then
 		player:GossipComplete()
@@ -153,16 +156,14 @@ local function BlackJackOnSelect(event, player, unit, sender, intid, code)
 		player:RegisterEvent(DealerDealCard, 300, 1)
 	end
 --	++++++++++++++++++++++++++++++++++++ --
-	if(intid==9)then -- return game screen 
-		BlackJackOnPlay(1, player, unit)
-	end
 	if(intid==12)then -- hit me
+		player:RemoveItem(currency, bet)
 		player:RegisterEvent(PlayerDealCard, 100, 1)
-		player:RegisterEvent(DealerDealCard, 200, 1)
+		player:RegisterEvent(DealerDealCard, 150, 1)
 	end
 	if(intid==13)then
 	 -- stay
-		player:RegisterEvent(DealerDealCard, 200, 1)
+		player:RegisterEvent(DealerDealCard, 100, 1)
 	end
 	if(intid==14)then
 		BlackJackOnPlayerWin(1, player, unit)
