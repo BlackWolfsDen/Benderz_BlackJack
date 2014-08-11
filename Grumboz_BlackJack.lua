@@ -5,6 +5,7 @@ local bet = 1
 local Suit = {};
 local Card = {};
 local Hand = {};
+
 local function GetItemNameById(id)
 local err = "ERROR GetItemById() name value is nil(Item "..id.." May not exist in database)"
 local search = WorldDBQuery("SELECT `name` FROM `item_template` WHERE `entry` = '"..id.."';");
@@ -86,7 +87,7 @@ local card = Card[player:GetGUIDLow()][suit][2][value][1]
 			BlackJackOnPlay(1, player)
 		end
 	else
-		print("player nil card : Redeal")
+--		print("player nil card : Redeal")
 		player:RegisterEvent(PlayerDealCard, 100, 1)
 	end
 end
@@ -103,7 +104,7 @@ local suit_name = Card[player:GetGUIDLow()][suit][1]
 		Hand[player:GetGUIDLow()].dealer = (Hand[player:GetGUIDLow()].dealer + card)
 		Hand[player:GetGUIDLow()].first = card
 	else
-		print("dealer nil card : Redeal")
+--		print("dealer nil card : Redeal")
 		DealerDeal_FIRST_Card(event, timer, cycle, player)
 	end
 end
