@@ -26,10 +26,10 @@ end
 
 local function ShuffleCards(player, guid)
 Card[guid] = {
-	[1] = {"HEARTS",{{1,"A"},{2,2},{3,3},{4,4},{5,5},{6,6},{7,7},{8,8},{9,9},{10,10},{10,"J"},{10,"Q"},{10,"K"}}},
-	[2] = {"DIAMONDS",{{1,"A"},{2,2},{3,3},{4,4},{5,5},{6,6},{7,7},{8,8},{9,9},{10,10},{10,"J"},{10,"Q"},{10,"K"}}},
-	[3] = {"CLUBS",{{1,"A"},{2,2},{3,3},{4,4},{5,5},{6,6},{7,7},{8,8},{9,9},{10,10},{10,"J"},{10,"Q"},{10,"K"}}},
-	[4] = {"SPADES",{{1,"A"},{2,2},{3,3},{4,4},{5,5},{6,6},{7,7},{8,8},{9,9},{10,10},{10,"J"},{10,"Q"},{10,"K"}}},
+	[1] = {{1},{2},{3},{4},{5},{6},{7},{8},{9},{10},{11},{10},{10},{10}},
+	[2] = {{1},{2},{3},{4},{5},{6},{7},{8},{9},{10},{11},{10},{10},{10}},
+	[3] = {{1},{2},{3},{4},{5},{6},{7},{8},{9},{10},{11},{10},{10},{10}},
+	[4] = {{1},{2},{3},{4},{5},{6},{7},{8},{9},{10},{11},{10},{10},{10}}
 		}
 end
 
@@ -63,10 +63,28 @@ local function BlackJackOnPlayerWin(event, player, unit, guid)
 	player:GossipSendMenu(1, Hand[guid].creature)
 end
 
+local function BlackJackOnPlayerTO(event, player, unit, guid)
+	player:GossipClearMenu()
+	player:GossipMenuAddItem(10,"You:"..Hand[guid].player.." :: Dealer:"..Hand[guid].dealer.."", 0, 14)
+	player:GossipMenuAddItem(10,"21. You win.", 0, 14)
+	player:GossipMenuAddItem(10,"again.", 0, 11)
+	player:GossipMenuAddItem(10,"good bye.", 0, 10)
+	player:GossipSendMenu(1, Hand[guid].creature)
+end
+
+local function BlackJackOnDealerTO(event, player, unit, guid)
+	player:GossipClearMenu()
+	player:GossipMenuAddItem(10,"You:"..Hand[guid].player.." :: Dealer:"..Hand[guid].dealer.."", 0, 14)
+	player:GossipMenuAddItem(10,"Dealer hit 21. You loose.", 0, 14)
+	player:GossipMenuAddItem(10,"again.", 0, 11)
+	player:GossipMenuAddItem(10,"good bye.", 0, 10)
+	player:GossipSendMenu(1, Hand[guid].creature)
+end
+
 local function BlackJackOnDealerWin(event, player, unit, guid)
 	player:GossipClearMenu()
 	player:GossipMenuAddItem(10,"You:"..Hand[guid].player.." :: Dealer:"..Hand[guid].dealer.."", 0, 15)
-	player:GossipMenuAddItem(10,"You went over 21.", 0, 15)
+	player:GossipMenuAddItem(10,"Dealer wins. You went over 21.", 0, 15)
 	player:GossipMenuAddItem(10,"again.", 0, 11)
 	player:GossipMenuAddItem(10,"good bye.", 0, 10)
 	player:GossipSendMenu(1, Hand[guid].creature)
@@ -97,67 +115,22 @@ local function BlackJackOnPlay(event, player, unit, guid)
 	player:GossipSendMenu(1, Hand[guid].creature)
 end
 
-local function PlayerDealCard(event, timer, cycle, player)
-local guid = player:GetGUIDLow()
+local function DealCard(event, player, guid)
 local suit = math.random(1,4)
-local value = math.random(1,13)
+local value = math.random(1,14)
 
-	if(Card[guid][suit][2][value][1])then
-		local card = Card[guid][suit][2][value][1]
-		Hand[guid].turns =(Hand[guid].turns + 1)
-		Card[guid][suit][2][value][1] = nil;
-		Hand[guid].player = (Hand[guid].player + card)
+print(suit,value)
+print(Card[guid][suit][value][1])
+
+	if(Card[guid][suit][value][1] > 0)then
+		local card = (Card[guid][suit][value][1])
+		return(card)
 	else
-		BlackJackOnPlay(1, player, Hand[guid].creature, guid)
-		PlayerDealCard(event, timer, cycle, player)
+		print("New Card")
+		DealCard(event, timer, cycle, player)
 	end
-end
-
-local function DealerDealCard(event, timer, cycle, player)
-local guid = player:GetGUIDLow()
-local suit = math.random(1,4)
-local value = math.random(1,13)
-
-	if(Card[player:GetGUIDLow()][suit][2][value][1])then
-		local card = Card[guid][suit][2][value][1]
-		Hand[guid].turns =(Hand[player:GetGUIDLow()].turns + 1)
-		Card[guid][suit][2][value][1] = nil;
-		Hand[guid].dealer = (Hand[guid].dealer + card)
-		
-			if((Hand[guid].player < 21)and(Hand[guid].dealer < 21))then
-				player:RemoveEvents()
-				BlackJackOnPlay(1, player, Hand[guid].creature, guid)
-			end
-			
-			if((Hand[guid].player==21)and(Hand[guid].dealer==21))then
-				player:RemoveEvents()
-				BlackJackOnDraw(event, player, Hand[guid].creature, guid)
-			end
-			
-			if((Hand[guid].player > 21)and(Hand[guid].dealer > 21))then
-				player:RemoveEvents()
-				BlackJackOnNoWinner(event, player, Hand[guid].creature, guid)
-			end
-			
-			if((Hand[guid].player < 22)and(Hand[guid].dealer > 21))then
-				player:RemoveEvents()
-				local win = (bet * Hand[guid].turns)*2
-				player:AddItem(currency, win)
-				BlackJackOnPlayerWin(event, player, Hand[guid].creature, guid)
-			end
-
-			if((Hand[guid].player > 21)and(Hand[guid].dealer < 22))then
-				player:RemoveEvents()
-				local win = (bet * Hand[guid].turns)*2
-				player:AddItem(currency, win)
-				BlackJackOnDealerWin(event, player, Hand[guid].creature, guid)
-			end
-			
-	else
-print(157)
-		player:RemoveEvents()
-		dtimer = player:RegisterEvent(DealerDealCard, 10, 1)
-	end
+print("CARD:"..card)
+Card[guid][suit][value][1] = 0
 end
 
 -- ******************************* --
@@ -180,7 +153,7 @@ local guid = player:GetGUIDLow()
 			player:GossipComplete()
 		end
 	--	++++++++++++++++++++++++++++++++++++ --
-		if(intid==11)then -- start game first deal = double-deal
+		if(intid==11)then -- start game first deal
 			ShuffleCards(player, guid)
 			ShuffleHand(player, unit, guid)
 			player:RemoveItem(currency, bet)
@@ -189,8 +162,44 @@ local guid = player:GetGUIDLow()
 
 		if(intid==12)then -- hit me
 			player:RemoveItem(currency, bet)
-			ptimer = player:RegisterEvent(PlayerDealCard, 10, 1)
-			dtimer = player:RegisterEvent(DealerDealCard, 20, 1)
+			local pcard = DealCard(event, player, guid)
+			local dcard = DealCard(event, player, guid)
+			local win = (bet * Hand[guid].turns)*2
+		
+			Hand[guid].player = (Hand[guid].player + pcard)
+			Hand[guid].dealer = (Hand[guid].dealer + dcard)
+			Hand[guid].turns =(Hand[guid].turns + 1)
+
+				if((Hand[guid].player < 21)and(Hand[guid].dealer < 21))then
+					BlackJackOnPlay(1, player, Hand[guid].creature, guid)
+				end
+				
+				if((Hand[guid].player==21)and(Hand[guid].dealer==21))then
+					BlackJackOnDraw(event, player, Hand[guid].creature, guid)
+				end
+				
+				if((Hand[guid].player==21)and((Hand[guid].dealer < 21)or(Hand[guid].dealer > 21)))then
+					player:AddItem(currency, win)
+					BlackJackOnPlayerTO(event, player, Hand[guid].creature, guid)
+				end
+				
+				if(((Hand[guid].player < 21)or(Hand[guid].player > 21))and(Hand[guid].dealer==21))then
+					BlackJackOnDealerTO(event, player, Hand[guid].creature, guid)
+				end
+				
+				if((Hand[guid].player < 21)and(Hand[guid].dealer > 21))then
+					player:AddItem(currency, win)
+					BlackJackOnPlayerWin(event, player, Hand[guid].creature, guid)
+				end
+	
+				if((Hand[guid].player > 21)and(Hand[guid].dealer < 21))then
+					BlackJackOnDealerWin(event, player, Hand[guid].creature, guid)
+				end
+				
+				if((Hand[guid].player > 21)and(Hand[guid].dealer > 21))then
+					BlackJackOnNoWinner(event, player, Hand[guid].creature, guid)
+				end
+							
 		end
 	
 		if(intid==14)then
