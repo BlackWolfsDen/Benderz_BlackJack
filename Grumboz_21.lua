@@ -116,6 +116,7 @@ local function BlackJackOnPlay(event, player, unit, guid)
 	player:GossipClearMenu()
 	player:GossipMenuAddItem(10,"You:"..Hand[guid].player.." :: Dealer:"..Hand[guid].dealer.."", 0, 9)
 	player:GossipMenuAddItem(10,"hit me.", 0, 12)
+	player:GossipMenuAddItem(10,"good bye.", 0, 10)
 	player:GossipSendMenu(1, Hand[guid].creature)
 end
 
