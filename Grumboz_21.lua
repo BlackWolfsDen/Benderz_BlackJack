@@ -70,7 +70,7 @@ end
 local function BlackJackOnPlayerTO(event, player, unit, guid)
 	player:GossipClearMenu()
 	player:GossipMenuAddItem(10,"You:"..Hand[guid].player.." :: Dealer:"..Hand[guid].dealer.."", 0, 14)
-	player:GossipMenuAddItem(10,"21. You win.", 0, 14)
+	player:GossipMenuAddItem(10,"21. You win.", 0, 13)
 	player:GossipMenuAddItem(10,"again.", 0, 11)
 	player:GossipMenuAddItem(10,"good bye.", 0, 10)
 	player:GossipSendMenu(1, Hand[guid].creature)
@@ -79,7 +79,7 @@ end
 local function BlackJackOnDealerTO(event, player, unit, guid)
 	player:GossipClearMenu()
 	player:GossipMenuAddItem(10,"You:"..Hand[guid].player.." :: Dealer:"..Hand[guid].dealer.."", 0, 14)
-	player:GossipMenuAddItem(10,"Dealer hit 21. You loose.", 0, 14)
+	player:GossipMenuAddItem(10,"Dealer hit 21. You loose.", 0, 16)
 	player:GossipMenuAddItem(10,"again.", 0, 11)
 	player:GossipMenuAddItem(10,"good bye.", 0, 10)
 	player:GossipSendMenu(1, Hand[guid].creature)
@@ -201,6 +201,10 @@ local guid = player:GetGUIDLow()
 							
 		end
 	
+		if(intid==13)then
+			BlackJackOnPlayerTO(1, player, unit, guid)
+		end
+							
 		if(intid==14)then
 			BlackJackOnPlayerWin(1, player, unit, guid)
 		end
@@ -209,6 +213,10 @@ local guid = player:GetGUIDLow()
 			BlackJackOnDealerWin(1, player, unit, guid)
 		end
 		
+		if(intid==16)then
+			BlackJackOnDealerTO(1, player, unit, guid)
+		end
+							
 		if(intid==17)then
 			BlackJackOnDraw(event, player, unit, guid)
 		end
