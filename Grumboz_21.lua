@@ -1,9 +1,10 @@
 -- From the Mad Scientist slp13at420 of EmuDevs.com
 print("+-+-+-+-+-+-+")
-local npcid = 390001
-local currency = 44209
-local bet = 1
+local npcid = 390001 -- creature_template id
+local currency = 44209 -- item_template id
+local bet = 1 -- how much each hit costs.
 
+-- DO NOT EDIT BELOW this line unless you know what your doing. --
 local Suit = {};
 local Card = {};
 local Hand = {};
