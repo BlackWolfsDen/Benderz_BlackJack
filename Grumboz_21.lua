@@ -1,4 +1,4 @@
--- slp13at420 of EmuDevs.com
+-- From the Mad Scientist slp13at420 of EmuDevs.com
 print("+-+-+-+-+-+-+")
 local npcid = 390001
 local currency = 44209
