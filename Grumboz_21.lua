@@ -5,6 +5,7 @@ local currency = 44209 -- item_template id
 local bet = 1 -- how much each hit costs.
 
 -- DO NOT EDIT BELOW this line unless you know what your doing. --
+
 local Suit = {};
 local Card = {};
 local Hand = {};
