@@ -3,9 +3,11 @@ print("+-+-+-+-+-+-+")
 local npcid = 390001
 local currency = 44209
 local bet = 1
+
 local Suit = {};
 local Card = {};
 local Hand = {};
+
 local function GetItemNameById(id)
 local err = "ERROR GetItemById() name value is nil(Item "..id.." May not exist in database)"
 local search = WorldDBQuery("SELECT `name` FROM `item_template` WHERE `entry` = '"..id.."';");
@@ -119,9 +121,6 @@ local function DealCard(event, player, guid)
 local suit = math.random(1,4)
 local value = math.random(1,14)
 
-print(suit,value)
-print(Card[guid][suit][value][1])
-
 	if(Card[guid][suit][value][1] > 0)then
 		local card = (Card[guid][suit][value][1])
 		return(card)
@@ -129,7 +128,6 @@ print(Card[guid][suit][value][1])
 		print("New Card")
 		DealCard(event, timer, cycle, player)
 	end
-print("CARD:"..card)
 Card[guid][suit][value][1] = 0
 end
 
