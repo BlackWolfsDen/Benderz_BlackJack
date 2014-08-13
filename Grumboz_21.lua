@@ -125,7 +125,6 @@ local value = math.random(1,14)
 		local card = (Card[guid][suit][value][1])
 		return(card)
 	else
-		print("New Card")
 		DealCard(event, timer, cycle, player)
 	end
 Card[guid][suit][value][1] = 0
