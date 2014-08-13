@@ -43,7 +43,7 @@ local function BlackJackInstructions(event, player, unit, guid)
 	player:GossipMenuAddItem(0,"without going over wins.", 0, 8)
 	player:GossipMenuAddItem(10,"back", 0, 7)
 	player:GossipMenuAddItem(10,"good bye.", 0, 10)
-	player:GossipSendMenu(1, Hand[player:GetGUIDLow()].creature)
+	player:GossipSendMenu(1, Hand[guid].creature)
 end
 
 local function BlackJackOnHello(event, player, unit)
