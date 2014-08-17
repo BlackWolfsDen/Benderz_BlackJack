@@ -121,6 +121,11 @@ local function BlackJackOnPlay(event, player, unit, guid)
 end
 
 local function DealCard(event, player, guid)
+
+local ostime = tonumber(GetGameTime())
+local seed = (ostime*ostime)
+math.randomseed(seed)
+
 local suit = math.random(1,4)
 local value = math.random(1,14)
 
