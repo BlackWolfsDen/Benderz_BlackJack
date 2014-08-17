@@ -162,7 +162,6 @@ local guid = player:GetGUIDLow()
 		if(intid==11)then -- start game first deal
 			ShuffleCards(player, guid)
 			ShuffleHand(player, unit, guid)
-			player:RemoveItem(currency, bet)
 			BlackJackOnSelect(event, player, unit, sender, 12, code)	
 		end
 
