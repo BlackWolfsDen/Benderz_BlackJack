@@ -29,6 +29,11 @@ local function ShuffleHand(player, unit, guid)
 end
 
 local function ShuffleCards(player, guid)
+
+local ostime = tonumber(GetGameTime())
+local seed = (ostime*ostime)
+math.randomseed(seed)
+
 Card[guid] = {
 	[1] = {{1},{2},{3},{4},{5},{6},{7},{8},{9},{10},{11},{10},{10},{10}},
 	[2] = {{1},{2},{3},{4},{5},{6},{7},{8},{9},{10},{11},{10},{10},{10}},
@@ -121,10 +126,6 @@ local function BlackJackOnPlay(event, player, unit, guid)
 end
 
 local function DealCard(event, player, guid)
-
-local ostime = tonumber(GetGameTime())
-local seed = (ostime*ostime)
-math.randomseed(seed)
 
 local suit = math.random(1,4)
 local value = math.random(1,14)
