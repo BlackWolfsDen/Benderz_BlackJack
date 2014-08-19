@@ -242,5 +242,5 @@ end
 
 RegisterCreatureGossipEvent(npcid, 1, BlackJackOnHello)
 RegisterCreatureGossipEvent(npcid, 2, BlackJackOnSelect)
-print(" Grumboz 21.")
+print("+Grumbo'z 21+")
 print("+-+-+-+-+-+-+")
