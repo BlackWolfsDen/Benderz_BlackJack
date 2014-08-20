@@ -30,9 +30,7 @@ end
 
 local function ShuffleCards(player, guid)
 
-local ostime = tonumber(GetGameTime())
-local seed = (ostime*ostime)
-math.randomseed(seed)
+math.randomseed(tonumber(os.time()*os.time()))
 
 Card[guid] = {
 	[1] = {{1},{2},{3},{4},{5},{6},{7},{8},{9},{10},{11},{10},{10},{10}},
