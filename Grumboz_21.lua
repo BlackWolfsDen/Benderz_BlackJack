@@ -3,14 +3,13 @@ print("+-+-+-+-+-+-+")
 local npcid = 390001 -- creature_template id
 local currency = 44209 -- item_template id
 local bet = 1 -- how much each hit costs.
+local currency_name = GetItemLink(currency)
 
 -- DO NOT EDIT BELOW this line unless you know what your doing. --
 
 local Suit = {};
 local Card = {};
 local Hand = {};
-
-local currency_name = GetItemLink(currency)
 
 local function ShuffleHand(player, unit, guid)
 	Hand[guid] = {player = 0, dealer = 0, first = 0, turns = 0, creature = unit};
