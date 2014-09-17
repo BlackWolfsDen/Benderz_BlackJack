@@ -10,19 +10,7 @@ local Suit = {};
 local Card = {};
 local Hand = {};
 
-local function GetItemNameById(id)
-local err = "ERROR GetItemById() name value is nil(Item "..id.." May not exist in database)"
-local search = WorldDBQuery("SELECT `name` FROM `item_template` WHERE `entry` = '"..id.."';");
-
-	if(search)then
-		local itemname = search:GetString(0)
-		return(itemname)
-	else
-		error(err)
-	end
-end
-
-local currency_name = GetItemNameById(currency)
+local currency_name = GetItemLink(currency)
 
 local function ShuffleHand(player, unit, guid)
 	Hand[guid] = {player = 0, dealer = 0, first = 0, turns = 0, creature = unit};
