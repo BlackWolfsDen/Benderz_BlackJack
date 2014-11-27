@@ -1,5 +1,5 @@
 -- From the Mad Scientist slp13at420 of EmuDevs.com
-print("+-+-+-+-+-+-+")
+print("+-+-+-©-+-+-+")
 local npcid = 390001 -- creature_template id
 local currency = 44209 -- item_template id
 local bet = 1 -- how much each hit costs.
