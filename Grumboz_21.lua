@@ -15,7 +15,7 @@ local Hand = {
 			dealer = 0,
 			first = 0,
 			turns = 0,
-			creature = unit,
+			unit_guid = nil,
 	};
 
 local function GetItemNameById(id)
@@ -32,19 +32,21 @@ end
 
 local currency_name = GetItemNameById(currency)
 
-local function ShuffleHand(player, unit, guid)
+local function ShuffleHand(player, unitguid)
 	Hand[guid] = {
 		player = 0,
 		dealer = 0,
 		first = 0,
 		turns = 0,
-		creature = unit,
+		unit_guid = unitguid,
 		};
 end
 
-local function ShuffleCards(player, guid)
+local function ShuffleCards(player)
 
 math.randomseed(tonumber(os.time()*os.time()))
+
+local guid = player:GetGUIDLow();
 
 Card[guid] = {
 	[1] = {{1},{2},{3},{4},{5},{6},{7},{8},{9},{10},{11},{10},{10},{10}},
@@ -54,9 +56,10 @@ Card[guid] = {
 		};
 end
 
-local function BlackJackInstructions(event, player, unit, guid)
+local function BlackJackInstructions(event, player)
 
 local guid = player:GetGUIDLow();
+local unit = player:GetMap():GetWorldObject(Hand[guid].unit_guid);
 
 	player:GossipClearMenu()
 	player:GossipMenuAddItem(0,"First to reach 21", 0, 8)
@@ -70,8 +73,12 @@ local function BlackJackOnHello(event, player, unit)
 
 local guid = player:GetGUIDLow();
 
-	ShuffleCards(player, guid)
-	ShuffleHand(player, unit, guid)
+if(unit)then Hand[guid].unit_guid = unit:GetGUIDLow(); end
+
+if not(unit)then local unit = player:GetMap():GetWorldObject(Hand[guid].unit_guid);end
+
+	ShuffleCards(player)
+	ShuffleHand(player, Hand[guid].unit_guid)
 	
 	player:GossipClearMenu()
 	player:GossipMenuAddItem(10,"costs "..bet.." "..currency_name.." per card.", 0, 7)
@@ -81,9 +88,10 @@ local guid = player:GetGUIDLow();
 	player:GossipSendMenu(1, unit)
 end
 
-local function BlackJackOnPlayerWin(event, player, unit, guid)
+local function BlackJackOnPlayerWin(event, player)
 
 local guid = player:GetGUIDLow();
+local unit = player:GetMap():GetWorldObject(Hand[guid].unit_guid);
 
 	player:GossipClearMenu()
 	player:GossipMenuAddItem(10,"You:"..Hand[guid].player.." :: Dealer:"..Hand[guid].dealer.."", 0, 14)
@@ -93,9 +101,10 @@ local guid = player:GetGUIDLow();
 	player:GossipSendMenu(1, unit)
 end
 
-local function BlackJackOnPlayerTO(event, player, unit, guid)
+local function BlackJackOnPlayerTO(event, player)
 
 local guid = player:GetGUIDLow();
+local unit = player:GetMap():GetWorldObject(Hand[guid].unit_guid);
 
 	player:GossipClearMenu()
 	player:GossipMenuAddItem(10,"You:"..Hand[guid].player.." :: Dealer:"..Hand[guid].dealer.."", 0, 14)
@@ -105,9 +114,10 @@ local guid = player:GetGUIDLow();
 	player:GossipSendMenu(1, unit)
 end
 
-local function BlackJackOnDealerTO(event, player, unit, guid)
+local function BlackJackOnDealerTO(event, player, guid)
 
 local guid = player:GetGUIDLow();
+local unit = player:GetMap():GetWorldObject(Hand[guid].unit_guid);
 
 	player:GossipClearMenu()
 	player:GossipMenuAddItem(10,"You:"..Hand[guid].player.." :: Dealer:"..Hand[guid].dealer.."", 0, 14)
@@ -117,9 +127,10 @@ local guid = player:GetGUIDLow();
 	player:GossipSendMenu(1, unit)
 end
 
-local function BlackJackOnDealerWin(event, player, unit, guid)
+local function BlackJackOnDealerWin(event, player, guid)
 
 local guid = player:GetGUIDLow();
+local unit = player:GetMap():GetWorldObject(Hand[guid].unit_guid);
 
 	player:GossipClearMenu()
 	player:GossipMenuAddItem(10,"You:"..Hand[guid].player.." :: Dealer:"..Hand[guid].dealer.."", 0, 15)
@@ -129,9 +140,10 @@ local guid = player:GetGUIDLow();
 	player:GossipSendMenu(1, unit)
 end
 
-local function BlackJackOnDraw(event, player, unit, guid)
+local function BlackJackOnDraw(event, player)
 
 local guid = player:GetGUIDLow();
+local unit = player:GetMap():GetWorldObject(Hand[guid].unit_guid);
 
 	player:GossipClearMenu()
 	player:GossipMenuAddItem(10,"You:"..Hand[guid].player.." :: Dealer:"..Hand[guid].dealer.."", 0, 17)
@@ -141,9 +153,10 @@ local guid = player:GetGUIDLow();
 	player:GossipSendMenu(1, unit)
 end
 
-local function BlackJackOnNoWinner(event, player, unit, guid)
+local function BlackJackOnNoWinner(event, player)
 
 local guid = player:GetGUIDLow();
+local unit = player:GetMap():GetWorldObject(Hand[guid].unit_guid);
 
 	player:GossipClearMenu()
 	player:GossipMenuAddItem(10,"You:"..Hand[guid].player.." :: Dealer:"..Hand[guid].dealer.."", 0, 9)
@@ -153,9 +166,10 @@ local guid = player:GetGUIDLow();
 	player:GossipSendMenu(1, unit)
 end
 
-local function BlackJackOnPlay(event, player, unit, guid)
+local function BlackJackOnPlay(event, player)
 
 local guid = player:GetGUIDLow();
+local unit = player:GetMap():GetWorldObject(Hand[guid].unit_guid);
 
 	player:GossipClearMenu()
 	player:GossipMenuAddItem(10,"You:"..Hand[guid].player.." :: Dealer:"..Hand[guid].dealer.."", 0, 9)
@@ -164,11 +178,13 @@ local guid = player:GetGUIDLow();
 	player:GossipSendMenu(1, unit)
 end
 
-local function DealCard(event, player, guid)
+local function DealCard(event, player)
 
 local guid = player:GetGUIDLow();
 local suit = math.random(1,4);
 local value = math.random(1,14);
+
+local unit = player:GetMap():GetWorldObject(Hand[guid].unit_guid);
 
 	if(Card[guid][suit][value][1] > 0)then
 		local card = (Card[guid][suit][value][1]);
@@ -187,28 +203,28 @@ local guid = player:GetGUIDLow();
 
 	if(player:GetItemCount(currency)>=bet)then
 		if(intid<=7)then
-			BlackJackOnHello(1, player, unit);
+			BlackJackOnHello(1, player);
 		end
 		if(intid==8)then -- goto/return instructions
-			BlackJackInstructions(event, player, unit, guid);
+			BlackJackInstructions(1, player);
 		end
 		if(intid==9)then -- return game screen 
-			BlackJackOnPlay(event, player, unit, guid);
+			BlackJackOnPlay(1, player);
 		end
 		if(intid==10)then
 			player:GossipComplete();
 		end
 	--	++++++++++++++++++++++++++++++++++++ --
 		if(intid==11)then -- start game first deal
-			ShuffleHand(player, unit, guid);
-			ShuffleCards(player, guid);
+			ShuffleHand(player, Hand[guid].unit_guid);
+			ShuffleCards(player);
 			BlackJackOnSelect(event, player, unit, sender, 12, code);	
 		end
 
 		if(intid==12)then -- hit me
 			player:RemoveItem(currency, bet);
-			local pcard = DealCard(event, player, guid);
-			local dcard = DealCard(event, player, guid);
+			local pcard = DealCard(1, player);
+			local dcard = DealCard(1, player);
 			local win = (bet * Hand[guid].turns)*2;
 		
 			Hand[guid].player = (Hand[guid].player + pcard);
@@ -216,63 +232,63 @@ local guid = player:GetGUIDLow();
 			Hand[guid].turns =(Hand[guid].turns + 1);
 
 				if((Hand[guid].player < 21)and(Hand[guid].dealer < 21))then
-					BlackJackOnPlay(1, player, unit, guid)
+					BlackJackOnPlay(1, player)
 				end
 				
 				if((Hand[guid].player==21)and(Hand[guid].dealer==21))then
-					BlackJackOnDraw(event, player, unit, guid)
+					BlackJackOnDraw(1, player)
 				end
 				
 				if((Hand[guid].player==21)and((Hand[guid].dealer < 21)or(Hand[guid].dealer > 21)))then
 					player:AddItem(currency, win)
-					BlackJackOnPlayerTO(event, player, unit, guid)
+					BlackJackOnPlayerTO(1, player)
 				end
 				
 				if(((Hand[guid].player < 21)or(Hand[guid].player > 21))and(Hand[guid].dealer==21))then
-					BlackJackOnDealerTO(event, player, unit, guid)
+					BlackJackOnDealerTO(1, player)
 				end
 				
 				if((Hand[guid].player < 21)and(Hand[guid].dealer > 21))then
 					player:AddItem(currency, win)
-					BlackJackOnPlayerWin(event, player, unit, guid)
+					BlackJackOnPlayerWin(1, player)
 				end
 	
 				if((Hand[guid].player > 21)and(Hand[guid].dealer < 21))then
-					BlackJackOnDealerWin(event, player, unit, guid)
+					BlackJackOnDealerWin(1, player)
 				end
 				
 				if((Hand[guid].player > 21)and(Hand[guid].dealer > 21))then
-					BlackJackOnNoWinner(event, player, unit, guid)
+					BlackJackOnNoWinner(1, player)
 				end
 							
 		end
 	
 		if(intid==13)then
-			BlackJackOnPlayerTO(1, player, unit, guid)
+			BlackJackOnPlayerTO(1, player)
 		end
 							
 		if(intid==14)then
-			BlackJackOnPlayerWin(1, player, unit, guid)
+			BlackJackOnPlayerWin(1, player)
 		end
 		
 		if(intid==15)then
-			BlackJackOnDealerWin(1, player, unit, guid)
+			BlackJackOnDealerWin(1, player)
 		end
 		
 		if(intid==16)then
-			BlackJackOnDealerTO(1, player, unit, guid)
+			BlackJackOnDealerTO(1, player)
 		end
 							
 		if(intid==17)then
-			BlackJackOnDraw(event, player, unit, guid)
+			BlackJackOnDraw(1, player)
 		end
 		
 		if(intid==18)then
-			BlackJackOnNewPlay(event, player, guid)
+			BlackJackOnNewPlay(1, player)
 		end
 	
 		if(intid==19)then
-			BlackJackOnNoWinner(1, player, unit, guid)
+			BlackJackOnNoWinner(1, player)
 		end
 
 	else
